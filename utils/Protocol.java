@@ -8,7 +8,9 @@ public enum Protocol {
 	MERGE_MAP("MERGE_MAP", 4),
 	SHARE_MAP("SHARE_MAP", 5), 
 	WAIT_REPLY("WAIT_REPLY", 6),
-	HUNTERS("HUNTERS", 7);
+	HUNTERS("HUNTERS", 7),
+	RESEND_MAP("RESEND_MAP", 8),
+	WAIT_RESEND_MAP("WAIT_RESEND_MAP", 9);
 	
 	public final String label;
 	public final int number;

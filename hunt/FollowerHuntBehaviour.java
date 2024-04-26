@@ -1,12 +1,11 @@
 package hunt;
 
 import java.util.List;
-import mapSharing.MapAgent;
+
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import jade.core.behaviours.FSMBehaviour;
-import mapSharing.PingNearbyBehaviour;
+import myagents.MapAgent;
 import utils.MovingStates;
-import utils.Protocol;
 
 public class FollowerHuntBehaviour extends FSMBehaviour {
 
@@ -14,12 +13,9 @@ public class FollowerHuntBehaviour extends FSMBehaviour {
 	 * 
 	 */
 	private static final long serialVersionUID = -7203027947007703479L;
-	private List<String> allies;
-	
-	
+		
 	public FollowerHuntBehaviour(AbstractDedaleAgent agent, List<String> allies) {
 		super(agent);
-		this.allies = allies;
 
 		this.registerFirstState(new SearchEnnemyBehaviour(((MapAgent)this.myAgent)), MovingStates.SearchEnnemy.label);
 				

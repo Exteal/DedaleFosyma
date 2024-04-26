@@ -1,5 +1,6 @@
 package hunt;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -8,25 +9,36 @@ import dataStructures.tuple.Couple;
 import eu.su.mas.dedale.env.Location;
 import eu.su.mas.dedale.env.Observation;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
-import jade.core.behaviours.Behaviour;
-import mapSharing.FollowerAgent;
-import mapSharing.MapAgent;
+import jade.core.behaviours.OneShotBehaviour;
+import myagents.FollowerAgent;
+import myagents.MapAgent;
 import utils.MovingStates;
 
-public class FollowStenchBehaviour extends Behaviour {
+public class FollowStenchBehaviour extends OneShotBehaviour {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4173670085849547627L;
 
 	public FollowStenchBehaviour(AbstractDedaleAgent ag) {
 		super(ag);
 	}
+	
+	
+	private void waitABit() {
+		long start = new Date().getTime();
+		while(new Date().getTime() - start < 1000L){}
+		return;
+	}
+	
 	@Override
 	public void action() {
+				
+		String pos = ((MapAgent) myAgent).getHuntingPos();
+		List<String> uselessTiles = ((MapAgent) myAgent).getUselessTiles();
 		
-		
-		//System.out.println("follow stench");
-	
-		
-		String pos = ((MapAgent) myAgent).getHuntingPos(); 
-		if (pos != null) {
+		if (pos != null && !uselessTiles.contains(pos)) {
 			List<Couple<Location, List<Couple<Observation, Integer>>>> lobs = ((MapAgent)this.myAgent).observe();
 			List<Couple<Location, List<Couple<Observation, Integer>>>> stench = lobs.stream().filter(o -> o.getLeft().getLocationId().equals(pos)).collect(Collectors.toList());
 			
@@ -51,14 +63,11 @@ public class FollowStenchBehaviour extends Behaviour {
 						((MapAgent)myAgent).setHuntingPos(objective.getLocationId());
 					
 						((MapAgent)myAgent).increaseBlockCount();
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						System.out.println(myAgent.getLocalName() + ((MapAgent)myAgent).getBlockCount()+ " block");
 						
-						if (((MapAgent)myAgent).getBlockCount() > 10) {
+						waitABit();
+						//System.out.println(myAgent.getLocalName() + ((MapAgent)myAgent).getBlockCount()+ " block");
+						
+						if (((MapAgent)myAgent).getBlockCount() > 20) {
 							((FollowerAgent)myAgent).setMovingValue(MovingStates.BlockingEnnemy.number);
 						}}
 				}
@@ -83,7 +92,6 @@ public class FollowStenchBehaviour extends Behaviour {
 		List<Couple<Location, List<Couple<Observation, Integer>>>> lobs = ((MapAgent)this.myAgent).observe();
 		List<Couple<Location, List<Couple<Observation, Integer>>>> stenches = lobs.stream().filter(o -> o.getRight().stream().anyMatch(obs -> obs.getLeft().equals(Observation.STENCH))).collect(Collectors.toList());
 		
-		String currentPos = ((AbstractDedaleAgent)myAgent).getCurrentPosition().getLocationId();
 		
 		if (!stenches.isEmpty()) {
 			Random r = new Random();
@@ -104,12 +112,10 @@ public class FollowStenchBehaviour extends Behaviour {
 
 
 	}
+	
+	@Override
 	public int onEnd() {
 		return ((FollowerAgent)myAgent).getMovingValue();
 	}
-	@Override
-	public boolean done() {
-		return true;
-	}
-
+	
 }

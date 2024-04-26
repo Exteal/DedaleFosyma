@@ -2,24 +2,24 @@ package hunt;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import dataStructures.tuple.Couple;
 import eu.su.mas.dedale.env.Location;
-import eu.su.mas.dedale.env.Observation;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import jade.core.AID;
-import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import mapSharing.FollowerAgent;
-import mapSharing.MapAgent;
+import myagents.FollowerAgent;
+import myagents.MapAgent;
 import utils.MovingStates;
 import utils.Protocol;
 
-public class BlockingEnnemyBehaviour extends Behaviour {
+public class BlockingEnnemyBehaviour extends SimpleBehaviour {
 
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1809675210863166056L;
 	private List<String> allies;
 
 	public BlockingEnnemyBehaviour(AbstractDedaleAgent ag, List<String> allies) {
@@ -27,10 +27,17 @@ public class BlockingEnnemyBehaviour extends Behaviour {
 		this.allies = allies;
 	}
 	
+	
+	private void waitABit() {
+		long start = new Date().getTime();
+		while(new Date().getTime() - start < 1000L){}
+		return;
+	}
+	
 	@Override
 	public void action() {
 		try {
-			System.out.println("agent BLOCKING" + myAgent.getLocalName() + ((MapAgent)myAgent).getHuntingPos());
+			//System.out.println("agent BLOCKING" + myAgent.getLocalName() + ((MapAgent)myAgent).getHuntingPos());
 			Location myPosition = ((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
 			if (myPosition!=null && myPosition.getLocationId()!="") {
 
@@ -51,8 +58,7 @@ public class BlockingEnnemyBehaviour extends Behaviour {
 				((AbstractDedaleAgent)myAgent).sendMessage(msg);
 				
 				
-				long start = new Date().getTime();
-				while(new Date().getTime() - start < 1000L){}
+				waitABit();
 				
 				
 				MessageTemplate msgTemplate=MessageTemplate.and(
@@ -61,7 +67,10 @@ public class BlockingEnnemyBehaviour extends Behaviour {
 				
 				ACLMessage msgReceived=this.myAgent.receive(msgTemplate);
 				if (msgReceived!=null) {
+					
+					((MapAgent)myAgent).addToUseless(msgReceived.getContent());
 					((FollowerAgent)myAgent).setMovingValue(MovingStates.SearchEnnemy.number);
+					
 				}
 				
 				else {
@@ -84,10 +93,11 @@ public class BlockingEnnemyBehaviour extends Behaviour {
 
 	}
 
+	@Override
 	public int onEnd() {
-		//System.out.println("ENd of Block Value For Agent " + myAgent.getLocalName() + " is " + ((FollowerAgent)myAgent).getMovingValue() );
 		return ((FollowerAgent)myAgent).getMovingValue();
 	}
+	
 	@Override
 	public boolean done() {
 		return true;

@@ -5,10 +5,15 @@ import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import mapSharing.MapAgent;
+import myagents.MapAgent;
 import utils.Protocol;
 
 public class RespondPingHuntBehaviour extends SimpleBehaviour {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1619658019956741339L;
 
 	public RespondPingHuntBehaviour(AbstractDedaleAgent ag) {
 		super(ag);

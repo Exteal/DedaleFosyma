@@ -8,8 +8,8 @@ import eu.su.mas.dedale.env.Location;
 import eu.su.mas.dedale.env.Observation;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import jade.core.behaviours.SimpleBehaviour;
-import mapSharing.FollowerAgent;
-import mapSharing.MapAgent;
+import myagents.FollowerAgent;
+import myagents.MapAgent;
 import utils.MovingStates;
 
 import java.util.Random;
@@ -17,6 +17,11 @@ import java.util.Random;
 public class SearchEnnemyBehaviour extends SimpleBehaviour {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1214089730462920189L;
+
 	public SearchEnnemyBehaviour(AbstractDedaleAgent ag) {
 		super(ag);
 	}
@@ -24,23 +29,13 @@ public class SearchEnnemyBehaviour extends SimpleBehaviour {
 	@Override
 	public void action() {
 		
-		//System.out.println("search");
 		List<Couple<Location, List<Couple<Observation, Integer>>>> lobs = ((MapAgent)this.myAgent).observe();
 		List<Couple<Location, List<Couple<Observation, Integer>>>> stenches = lobs.stream().filter(o -> o.getRight().stream().anyMatch(obs -> obs.getLeft().equals(Observation.STENCH))).collect(Collectors.toList());
 		
-
-		//((MapAgent)this.myAgent).getMap().
 		
 		if (!stenches.isEmpty()) {
 			((FollowerAgent)this.myAgent).setMovingValue(MovingStates.FollowingStench.number);
 			
-			for (Couple<Location, List<Couple<Observation, Integer>>> stench : stenches) {
-				String locId = stench.getLeft().getLocationId();
-			}
-			
-			for (int i = 0; i < 3; i ++) {
-				
-			}
 			
 			Random r = new Random();
 			int move = r.nextInt(stenches.size());

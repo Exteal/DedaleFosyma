@@ -1,4 +1,4 @@
-package test;
+package exploration;
 
 import java.util.Iterator;
 import java.util.List;
@@ -12,17 +12,18 @@ import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation.MapAttribute;
 import jade.core.behaviours.SimpleBehaviour;
 import myagents.FollowerAgent;
 import myagents.MapAgent;
+import utils.MovingStates;
 import utils.MySerializableNode;
 
 
-public class RandomMoveBehaviour extends SimpleBehaviour {
+public class TargetedMoveBehaviour extends SimpleBehaviour {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6533196628465572862L;
 		
-	public RandomMoveBehaviour(AbstractDedaleAgent agent) {
+	public TargetedMoveBehaviour(AbstractDedaleAgent agent) {
 		super(agent);
 	}
 	
@@ -43,6 +44,7 @@ public class RandomMoveBehaviour extends SimpleBehaviour {
 		Location myPosition=((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
 		((MapAgent)this.myAgent).getMap().addNode(myPosition.getLocationId(), MapAttribute.closed);
 
+
 		
 		
 		//1) remove the current node from openlist and add it to closedNodes.
@@ -56,6 +58,7 @@ public class RandomMoveBehaviour extends SimpleBehaviour {
 			
 			
 			boolean isNewNode=((MapAgent)this.myAgent).getMap().addNewNode(accessibleNode.getLocationId());
+			
 			((MapAgent)this.myAgent).getFriendsKnowledge().addNewNode(new MySerializableNode(accessibleNode.getLocationId(), MapAttribute.open.toString()));
 			
 			//the node may exist, but not necessarily the edge
@@ -68,28 +71,85 @@ public class RandomMoveBehaviour extends SimpleBehaviour {
 				if (nextNodeId==null && isNewNode) nextNodeId=accessibleNode.getLocationId();
 			}
 		}
+			
+		
+		Location loc = ((MapAgent)this.myAgent).selectNextDestination();
+		
+		//cas ou plus aucun noeud ouvert n'existe
+		if (loc == null) {
+			((FollowerAgent)this.myAgent).setMovingValue(MovingStates.StartHunt.number);
+		}
 		
 		
-		Random r= new Random();
-		int moveId=1+r.nextInt(lobs.size()-1);//removing the current position from the list of target, not necessary as to stay is an action but allow quicker random move
-
-		//The move action (if any) should be the last action of your behaviour
-		
-		//System.out.println(this.myAgent.getAID().getLocalName() +" moved");
-		Location destination = lobs.get(moveId).getLeft();
-
-		/*if (this.getAgent() instanceof LeaderAgent) {
-			((AbstractDedaleAgent)this.getAgent()).addBehaviour(
-					new NotifyDestinationFollowersBehaviour((AbstractDedaleAgent) this.myAgent, destination, ((PackAgent)this.myAgent).getPack()));
-		}*/
-		
-		
-		((AbstractDedaleAgent)this.myAgent).moveTo(destination);
+		else {
+			
+			String last = ((MapAgent)this.myAgent).getLastDestination();
+			
+			if (last != null) {
+				if (loc.getLocationId().equals(last)) {
+					((MapAgent)this.myAgent).increaseTries();
+					
+					if (((MapAgent)this.myAgent).getTries() > 10) {
+						
+						String blockingLoopPos = ((MapAgent)this.myAgent).getBlockLoopPos();
+						
+						if (blockingLoopPos != null) {
+							
+							if (blockingLoopPos.equals(loc.getLocationId())) {
+								((FollowerAgent)this.myAgent).increaseBlockLoopCount();
+								if (((MapAgent)this.myAgent).getBlockLoopCount() > 10)  {
+									((FollowerAgent)this.myAgent).setMovingValue(MovingStates.StartHunt.number);	
+								}
+								
+							}
+							else {
+								((MapAgent)this.myAgent).setBlockLoopPos(loc.getLocationId());
+							}
+						}
+							
+						else {
+							Random r = new Random();
+							int rd=1+r.nextInt(lobs.size()-1);
+							
+							boolean free = ((MapAgent)this.myAgent).moveTo(lobs.get(rd).getLeft());
+							if (free) {
+								((MapAgent)this.myAgent).resetTries();
+								((MapAgent)this.myAgent).setLastDestination(lobs.get(rd).getLeft().getLocationId());
+								
+							}
+						}
+						
+						
+					}
+					
+					else {
+						((MapAgent)this.myAgent).setLastDestination(loc.getLocationId());
+						((MapAgent)this.myAgent).moveTo(loc);
+					}
+					
+				}
+				
+				else {
+					((MapAgent)this.myAgent).resetTries();
+					((MapAgent)this.myAgent).resetBlockLoopCount();
+					((MapAgent)this.myAgent).setLastDestination(loc.getLocationId());
+					((MapAgent)this.myAgent).moveTo(loc);
+				}
+			}
+			
+			else {
+				((MapAgent)this.myAgent).resetTries();
+				((MapAgent)this.myAgent).resetBlockLoopCount();
+				((MapAgent)this.myAgent).setLastDestination(loc.getLocationId());
+				((MapAgent)this.myAgent).moveTo(loc);
+			}
+			
+		}
+			
 	}
 	
 	public int onEnd() {
 		if (this.myAgent instanceof FollowerAgent) {
-		//	System.out.println("onEnd random Move " + ((FollowerAgent) this.myAgent).getMovingValue());
 			return ((FollowerAgent) this.myAgent).getMovingValue();
 		}
 		
@@ -99,11 +159,6 @@ public class RandomMoveBehaviour extends SimpleBehaviour {
 	}
 	
 	public boolean done() {
-		/*if (this.myAgent instanceof FollowerAgent) {
-			return ((FollowerAgent) this.myAgent).getMovingValue() != MovingStates.Random.getStateInt();
-		}
-		else return finished;
-			*/
 		return true;
 	}
 

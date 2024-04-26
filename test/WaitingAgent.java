@@ -3,14 +3,9 @@ package test;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.su.mas.dedale.mas.AbstractDedaleAgent;
-import eu.su.mas.dedale.mas.agent.behaviours.platformManagment.startMyBehaviours;
-import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation;
+import exploration.RespondPingBehaviour;
 import jade.core.behaviours.Behaviour;
-import mapSharing.MapAgent;
-import mapSharing.PrintKnowledgeBehaviour;
-import mapSharing.RespondPingBehaviour;
-import mine.*;
+import myagents.MapAgent;
 
 
 public class WaitingAgent extends MapAgent {

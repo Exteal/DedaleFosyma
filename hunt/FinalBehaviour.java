@@ -6,6 +6,11 @@ import jade.core.behaviours.SimpleBehaviour;
 public class FinalBehaviour extends SimpleBehaviour {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 9105439092657438561L;
+
 	public FinalBehaviour(AbstractDedaleAgent ag) {
 		super(ag);
 	}
